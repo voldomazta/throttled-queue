@@ -29,12 +29,10 @@ const urls = [
     "https://run.mocky.io/v3/7b038025-fc5f-4564-90eb-4373f0721822?mocky-delay=2s&x=7"
 ];
 
-ThrottledQueue(urls, (item, resolve, reject) => {
+ThrottledQueue(urls, (url, resolve, reject) => {
 
-    http.request({
-        method: "GET"
-    }, (response) => {
-        resolve(response);
+    http.request(url, resp => {
+        resolve(resp);
     });
 
 }, 2);
