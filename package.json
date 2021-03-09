@@ -1,7 +1,7 @@
 {
     "name": "throttled-queue",
     "version": "1.0.0",
-    "description": "A way to map a promise to a given array of items and being able to throttle the number promises created at one time.",
+    "description": "Map a Javascript Promise to a given array of items and being able to throttle the number of active Promises at any given time.",
     "repository": {
         "type": "git",
         "url": ""
