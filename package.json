@@ -1,0 +1,19 @@
+{
+    "name": "throttled-queue",
+    "version": "1.0.0",
+    "description": "A way to map a promise to a given array of items and being able to throttle the number promises created at one time.",
+    "repository": {
+        "type": "git",
+        "url": ""
+    },
+    "keywords": [
+        "throttled",
+        "queue"
+    ],
+    "author": "Ramon Alivio <ramon.alivio@evolutionfinance.com>",
+    "license": "ISC",
+    "bugs": {
+        "url": ""
+    },
+    "homepage": ""
+}
