@@ -4,7 +4,7 @@ class Resolver {
     constructor(input, transformer) {
         this._resolved = false;
         this._input = input;
-        this._promise = new Promise(async (resolve, reject) => {
+        this._promise = new Promise((resolve, reject) => {
             transformer(input, resolve, reject);
         }).then(o => {
             this._resolved = true;
