@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-class PromiseWatcher {
+class Resolver {
     constructor(input, transformer) {
         this._resolved = false;
         this._input = input;
@@ -29,7 +29,7 @@ async function ThrottledQueue(items, transformer, concurrency = 10) {
     while (items.length || queue.length) {
         if (items.length) {
             if (queue.length < concurrency) {
-                queue.push(new PromiseWatcher(items.splice(0, 1)[0], transformer));
+                queue.push(new Resolver(items.splice(0, 1)[0], transformer));
             }
         }
         if (queue.length == concurrency || !items.length || !items.length && queue.length) {
