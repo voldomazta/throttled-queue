@@ -1,3 +1,4 @@
-declare type Transformer = (item: any, resolve: (val: any) => void, reject: (val: any) => void) => void;
-export default function ThrottledQueue(items: any[], transformer: Transformer, concurrency?: number): Promise<any[]>;
+export declare type Settler = (val: any) => void;
+declare type Transformer = (item: any, resolve: Settler, reject: Settler) => void;
+export default function tq(items: any[], transformer: Transformer, concurrency?: number): Promise<any[]>;
 export {};

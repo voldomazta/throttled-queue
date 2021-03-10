@@ -2,68 +2,46 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 class Resolver {
     constructor(input, transformer) {
-        this._resolved = false;
-        this._input = input;
-        this._promise = new Promise((resolve, reject) => {
-            transformer(input, resolve, reject);
+        this.resolved = false;
+        this.input = input;
+        this.promise = new Promise((resolve, reject) => {
+            transformer.call(this, input, resolve, reject);
         }).then(o => {
-            this._resolved = true;
-            this._output = o;
+            this.output = o;
+            this.resolved = true;
         });
     }
-    promise() {
-        return this._promise;
-    }
-    resolved() {
-        return this._resolved;
-    }
-    input() {
-        return this._input;
-    }
-    output() {
-        return this._output;
-    }
 }
-async function ThrottledQueue(items, transformer, concurrency = 10) {
+async function tq(items, transformer, concurrency = 10) {
     let queue = [], results = [];
-    // Loop until there are no more items to process
-    while (items.length || queue.length) {
-        // If we still have items to enqueue
-        if (items.length) {
-            // Limit numer of concurrent promises
-            if (queue.length < concurrency) {
-                // Take note that promises are created/started at this point
-                queue.push(new Resolver(items.splice(0, 1)[0], transformer));
-            }
+    // Run loop at least once
+    do {
+        // If we have items to enqueue, limit numer of active promises
+        if (items.length && queue.length < concurrency) {
+            // Take note that promises are created/started at this point
+            queue.push(new Resolver(items.splice(0, 1)[0], transformer));
         }
-        /**
-         * Observe promise resolution when:
-         * 1.) The queue has hit concurrency limit; or
-         * 2.) If we have enqueued everything; or
-         * 3.) #2 and there are still items on the queue
-         */
-        if (queue.length == concurrency || !items.length || !items.length && queue.length) {
-            // Get promises from the queue objects
-            let promises = [];
-            for (let i = 0; i < queue.length; i++) {
-                promises.push(queue[i].promise());
-            }
+        // Observe promise resolution if we have reached concurrency limit or there are no more items to add
+        if (queue.length && (!items.length || queue.length == concurrency)) {
             // Block until one of the promises have resolved
-            await Promise.race(promises).then(() => {
-                // Remove all the resolved promises from the queue, not just this one
-                for (let i = 0; i < queue.length; i++) {
-                    if (queue[i].resolved()) {
-                        let promise = queue.splice(i, 1)[0];
+            await Promise.race(queue.map(item => item.promise)).then(() => {
+                // Get indices of resolved promises
+                queue.map((promise, i) => promise.resolved ? i : false)
+                    // Get the indices in reverse order so we can splice them without breaking the array
+                    .reverse().map(i => {
+                    if (i !== false) {
+                        // Record i/o
                         results.push({
-                            "input": promise.input(),
-                            "output": promise.output()
+                            input: queue[i].input,
+                            output: queue[i].output
                         });
-                        promise = null;
+                        // Actual removal from the queue
+                        queue.splice(i, 1);
                     }
-                }
+                });
             });
         }
-    }
+    } while (queue.length);
     return results;
 }
-exports.default = ThrottledQueue;
+exports.default = tq;
