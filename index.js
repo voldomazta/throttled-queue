@@ -12,8 +12,9 @@ class Resolver {
         });
     }
 }
+let queue = [];
 async function tq(items, executor, concurrency = 10) {
-    let queue = [], results = [];
+    let results = [];
     // Run loop at least once
     do {
         // If we have items to enqueue, limit numer of active promises
