@@ -1,25 +1,25 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class Resolver {
-    constructor(input, transformer) {
+    constructor(input, executor) {
         this.resolved = false;
         this.input = input;
         this.promise = new Promise((resolve, reject) => {
-            transformer.call(this, input, resolve, reject);
+            executor.call(this, input, resolve, reject);
         }).then(o => {
             this.output = o;
             this.resolved = true;
         });
     }
 }
-async function tq(items, transformer, concurrency = 10) {
+async function tq(items, executor, concurrency = 10) {
     let queue = [], results = [];
     // Run loop at least once
     do {
         // If we have items to enqueue, limit numer of active promises
         if (items.length && queue.length < concurrency) {
             // Take note that promises are created/started at this point
-            queue.push(new Resolver(items.splice(0, 1)[0], transformer));
+            queue.push(new Resolver(items.splice(0, 1)[0], executor));
         }
         // Observe promise resolution if we have reached concurrency limit or there are no more items to add
         if (queue.length && (!items.length || queue.length == concurrency)) {
