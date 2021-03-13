@@ -14,19 +14,25 @@ class Resolver {
 let queue = [];
 async function tq(items, executor, concurrency = 10) {
     let results = [];
+    // Get new queue id
+    const qid = "q-" + (new Date().getTime());
+    if (!(qid in queue)) {
+        queue[qid] = [];
+    }
+    let i = 0;
     // Run loop at least once
     do {
         // If we have items to enqueue, limit numer of active promises
-        if (i < items.length && queue.length < concurrency) {
+        if (i < items.length && queue[qid].length < concurrency) {
             // Take note that promises are created/started at this point
-            queue.push(new Resolver(items[i++], executor));
+            queue[qid].push(new Resolver(items[i++], executor));
         }
         // Observe promise resolution if we have reached concurrency limit or there are no more items to add
-        if (queue.length && (i == items.length || queue.length == concurrency)) {
+        if (queue[qid].length && (i == items.length || queue[qid].length == concurrency)) {
             // Block until one of the promises have resolved
-            await Promise.race(queue.map(item => item.promise)).then(() => {
+            await Promise.race(queue[qid].map(item => item.promise)).then(() => {
                 // Get indices of resolved promises
-                queue.map((promise, i) => promise.resolved ? i : false)
+                queue[qid].map((promise, i) => promise.resolved ? i : false)
                     // Get the indices in reverse order so we can splice them without breaking the array
                     .reverse().forEach(i => {
                     if (i !== false) {
@@ -35,12 +41,12 @@ async function tq(items, executor, concurrency = 10) {
                             results.push(queue[qid][i].output);
                         }
                         // Actual removal from the queue
-                        queue.splice(i, 1);
+                        queue[qid].splice(i, 1);
                     }
                 });
             });
         }
-    } while (queue.length);
+    } while (queue[qid].length);
     return results;
 }
 exports.default = tq;
