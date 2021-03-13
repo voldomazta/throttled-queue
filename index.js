@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 class Resolver {
     constructor(input, executor) {
         this.resolved = false;
-        this.input = input;
         this.promise = new Promise((resolve, reject) => {
             executor.call(this, input, resolve, reject);
         }).then(o => {
@@ -32,10 +31,9 @@ async function tq(items, executor, concurrency = 10) {
                     .reverse().map(i => {
                     if (i !== false) {
                         // Record i/o
-                        results.push({
-                            input: queue[i].input,
-                            output: queue[i].output
-                        });
+                        if (queue[qid][i].output) {
+                            results.push(queue[qid][i].output);
+                        }
                         // Actual removal from the queue
                         queue.splice(i, 1);
                     }
