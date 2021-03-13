@@ -28,7 +28,7 @@ async function tq(items, executor, concurrency = 10) {
                 // Get indices of resolved promises
                 queue.map((promise, i) => promise.resolved ? i : false)
                     // Get the indices in reverse order so we can splice them without breaking the array
-                    .reverse().map(i => {
+                    .reverse().forEach(i => {
                     if (i !== false) {
                         // Record i/o
                         if (queue[qid][i].output) {
