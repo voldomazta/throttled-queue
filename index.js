@@ -17,12 +17,12 @@ async function tq(items, executor, concurrency = 10) {
     // Run loop at least once
     do {
         // If we have items to enqueue, limit numer of active promises
-        if (items.length && queue.length < concurrency) {
+        if (i < items.length && queue.length < concurrency) {
             // Take note that promises are created/started at this point
-            queue.push(new Resolver(items.splice(0, 1)[0], executor));
+            queue.push(new Resolver(items[i++], executor));
         }
         // Observe promise resolution if we have reached concurrency limit or there are no more items to add
-        if (queue.length && (!items.length || queue.length == concurrency)) {
+        if (queue.length && (i == items.length || queue.length == concurrency)) {
             // Block until one of the promises have resolved
             await Promise.race(queue.map(item => item.promise)).then(() => {
                 // Get indices of resolved promises
